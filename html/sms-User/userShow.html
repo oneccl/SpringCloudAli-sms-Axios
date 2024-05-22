@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>超市订单管理系统</title>
+    <link type="text/css" rel="stylesheet" href="../../css/style.css" />
+    <link type="text/css" rel="stylesheet" href="../../css/public.css" />
+</head>
+<body>
+<div id="userShow">
+    <!--头部-->
+    <header class="publicHeader">
+        <h1>超市订单管理系统</h1>
+        <div class="publicHeaderR">
+            <p><span>下午好！</span><span style="color: #fff21b" v-text="un"> 系统管理员</span> , 欢迎你！</p>
+            <a href="login.html">退出</a>
+        </div>
+    </header>
+    <!--时间-->
+    <section class="publicTime">
+        <span id="time">2015年1月1日 11:11  星期一</span>
+        <a href="#">温馨提示：为了能正常浏览，请使用高版本浏览器！（IE10+）</a>
+    </section>
+    <!--主体内容-->
+    <section class="publicMian ">
+        <div class="left">
+            <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+            <nav>
+                <ul class="list">
+                    <li ><a href="../sms-Order/orderManage.html">订单管理</a></li>
+                    <li><a href="../sms-Provider/providerManage.html">供应商管理</a></li>
+                    <li><a href="userList.html">用户管理</a></li>
+                    <li><a href="pwUpdate.html">密码修改</a></li>
+                    <li><a href="login.html">退出系统</a></li>
+                </ul>
+            </nav>
+        </div>
+        <input type="hidden" id="path" name="path" value="/SMBMS"/>
+        <input type="hidden" id="referer" name="referer" value="http://localhost:8080jsp/user.do?method=query"/>
+        <div class="right">
+            <div class="location">
+                <strong>你现在所在的位置是:</strong>
+                <span>用户管理页面 >> 用户信息查看页面</span>
+            </div>
+            <div class="providerView">
+                <p><strong>用户编号：</strong><span v-text="showUser.userCode">null</span></p>
+                <p><strong>用户名称：</strong><span v-text="showUser.userName">null</span></p>
+                <p><strong>用户性别：</strong>
+                    <span v-if="showUser.gender === 1">男</span>
+                    <span v-if="showUser.gender === 2">女</span>
+                </p>
+                <p><strong>出生日期：</strong><span v-text="showUser.birthday">null</span></p>
+                <p><strong>用户电话：</strong><span v-text="showUser.phone">null</span></p>
+                <p><strong>用户地址：</strong><span v-text="showUser.address">null</span></p>
+                <p><strong>用户角色：</strong>
+                    <span v-if="showUser.userRole === 1">系统管理员</span>
+                    <span v-if="showUser.userRole === 2">经理</span>
+                    <span v-if="showUser.userRole === 3">普通员工</span>
+                </p>
+                <div class="providerAddBtn">
+                    <input type="button" id="back" name="back" value="返回" @click="back">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        版权归XXXX
+    </footer>
+    <script type="text/javascript" src="../../js/time.js"></script>
+    <script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="../../js/common.js"></script>
+    <script type="text/javascript" src="../../calendar/WdatePicker.js"></script>
+</div>
+</body>
+</html>
+<script src="../../vue/vue.js"></script>
+<script src="../../axios/axios.js"></script>
+<script src="../../js/jquery-params.js"></script>
+<script type="module">
+    import {post} from "../../js/reqAPI.js";
+    // 获取userList.html页面传递过来的参数
+    // 方式1：导入jquery-params.js包，使用$.query.get("param")获取
+    const uId = $.query.get("id");
+    new Vue({
+        el:"#userShow",
+        data:{
+            un:JSON.parse(localStorage.getItem("loginUserInfo")).userName,
+            showUser:{}
+        },
+        mounted(){
+            const th=this;
+
+            /*统一请求网关API*/
+            post("/UserService/findById.do?id="+uId).then(res=>{
+                if (res!=null){
+                    th.showUser=res.data;
+                }
+            })
+
+            // axios({
+            //     method:"post",
+            //     url:"http://localhost:8000/findById.do?id="+uId
+            // }).then(function (res) {
+            //     th.showUser=res.data;
+            // })
+        },
+        methods:{
+            back() {
+                history.back();
+            }
+        }
+    })
+</script>
+
+<!--<script>-->
+<!--    // 方式2：使用location.search获取链接？及之后的参数(如？id=10)，编写代码获取参数-->
+<!--    let url = location.search;-->
+<!--    alert(url);-->
+<!--    // 处理逻辑-->
+<!--</script>-->

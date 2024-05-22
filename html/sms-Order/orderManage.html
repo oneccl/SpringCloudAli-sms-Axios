@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>超市订单管理系统</title>
+    <link type="text/css" rel="stylesheet" href="../../css/style.css"/>
+    <link type="text/css" rel="stylesheet" href="../../css/public.css"/>
+</head>
+<body>
+<div id="orderMan">
+    <!--头部-->
+    <header class="publicHeader">
+        <h1>超市订单管理系统</h1>
+        <div class="publicHeaderR">
+            <p><span>下午好！</span><span style="color: #fff21b" v-text="un"> 系统管理员</span> , 欢迎你！</p>
+            <a href="../sms-User/login.html">退出</a>
+        </div>
+    </header>
+    <!--时间-->
+    <section class="publicTime">
+        <span id="time">2015年1月1日 11:11  星期一</span>
+        <a href="#">温馨提示：为了能正常浏览，请使用高版本浏览器！（IE10+）</a>
+    </section>
+    <!--主体内容-->
+    <section class="publicMian ">
+        <div class="left">
+            <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+            <nav>
+                <ul class="list">
+                    <li><a href="orderManage.html">订单管理</a></li>
+                    <li><a href="../sms-Provider/providerManage.html">供应商管理</a></li>
+                    <li><a href="../sms-User/userList.html">用户管理</a></li>
+                    <li><a href="../sms-User/pwUpdate.html">密码修改</a></li>
+                    <li><a href="../sms-User/login.html">退出系统</a></li>
+                </ul>
+            </nav>
+        </div>
+        <input type="hidden" id="path" name="path" value="/SMBMS"/>
+        <input type="hidden" id="referer" name="referer" value="http://localhost:8080jsp/frame.jsp"/>
+
+        <div class="right">
+            <div class="location">
+                <strong>你现在所在的位置是:</strong>
+                <span>订单管理页面</span>
+            </div>
+            <div class="search">
+                <form method="get" action="bill.do" onsubmit="return false">
+                    <input name="method" value="query" class="input-text" type="hidden">
+                    <span>商品名称：</span>
+                    <input name="queryProductName" type="text" v-model="name">
+                    <span>供应商：</span>
+                    <select name="queryProviderId" v-model="proId">
+                        <option value="0" selected="selected">--请选择--</option>
+                        <option v-for="pro in providers" :value="pro.proId" >{{pro.proName}}</option>
+                    </select>
+
+                    <span>是否付款：</span>
+                    <select name="queryIsPayment" v-model="isPay">
+                        <option value="0" selected="selected">--请选择--</option>
+                        <option value="1">未付款</option>
+                        <option value="2">已付款</option>
+                    </select>
+
+                    <input value="查 询" type="submit" id="searchbutton" @click="query">
+                    <a :href="'orderAdd.html?pros='+JSON.stringify(providers)">添加订单</a>
+                </form>
+            </div>
+            <!--账单表格 样式和供应商公用-->
+            <table class="providerTable" cellpadding="0" cellspacing="0">
+                <tr class="firstTr">
+                    <th width="10%">订单编码</th>
+                    <th width="15%">商品名称</th>
+                    <th width="20%">供应商</th>
+                    <th width="10%">订单金额</th>
+                    <th width="10%">是否付款</th>
+                    <th width="20%">创建时间</th>
+                    <th width="30%">操作</th>
+                </tr>
+                <tr v-for="order in orders">
+                    <td>
+                        <span v-text="order.orderCode">BILL2016_001</span>
+                    </td>
+                    <td>
+                        <span v-text="order.goodsName">洗发水、护发素</span>
+                    </td>
+                    <td>
+                        <span v-text="order.provider.proName">山东豪克华光联合发展有限公司</span>
+                    </td>
+                    <td>
+                        <span v-text="order.totalPrice">25000.00</span>
+                    </td>
+                    <td>
+                        <span v-text="order.isPayment">已付款</span>
+                    </td>
+                    <td>
+                        <span v-text="order.creationDate">2014-12-14</span>
+                    </td>
+                    <td>
+                    <span><a class="viewBill" :href="'orderShow.html?id='+order.orderId"><img
+                            src="../../images/read.png" alt="查看" title="查看"/></a></span>
+                        <span><a class="modifyBill" href="javascript:void(0)" @click="update(order.orderId)"><img
+                                src="../../images/xiugai.png" alt="修改" title="修改"/></a></span>
+                        <span><a class="deleteBill" href="javascript:void(0)" @click="del(order.orderId)"><img
+                                src="../../images/schu.png" alt="删除" title="删除"/></a></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <!--点击删除按钮后弹出的页面-->
+    <div class="zhezhao"></div>
+    <div class="remove" id="removeBi">
+        <div class="removerChid">
+            <h2>提示</h2>
+            <div class="removeMain">
+                <p>你确定要删除该订单吗？</p>
+                <a href="#" id="yes">确定</a>
+                <a href="#" id="no">取消</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        版权归XXXX
+    </footer>
+    <script type="text/javascript" src="../../js/time.js"></script>
+    <script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="../../js/common.js"></script>
+    <script type="text/javascript" src="../../calendar/WdatePicker.js"></script>
+</div>
+</body>
+</html>
+<script src="../../vue/vue.js"></script>
+<script src="../../axios/axios.js"></script>
+<script type="module">
+    import {get} from "../../js/reqAPI.js";
+    new Vue({
+        el:"#orderMan",
+        data:{
+            un:JSON.parse(localStorage.getItem("loginUserInfo")).userName,
+            orders:{},
+            providers:{},
+            name:"",
+            proId:"",
+            isPay:""
+        },
+        mounted(){
+            const th=this;
+
+            /*统一请求网关API*/
+            get("/OrderService/getOrders.do").then(res=>{
+                if (res != null){
+                    th.orders=res.data.orders;
+                    th.providers=res.data.providers;
+                }
+            })
+
+            // axios({
+            //     method:"get",
+            //     url:"http://localhost:8020/getOrders.do",
+            // }).then((res)=>{
+            //     if (res != null){
+            //         th.orders=res.data.orders;
+            //         th.providers=res.data.providers;
+            //     }
+            // })
+        },
+        methods:{
+            //  a链接：删除
+            del(id){
+
+                /*统一请求网关API*/
+                get("/OrderService/remove.do?id="+id).then(res=>{
+                    if (res.data){
+                        location.href="orderManage.html";
+                    }else {
+                        alert("删除失败!请重试!");
+                    }
+                })
+
+                // axios({
+                //     method: "get",
+                //     url: "http://localhost:8020/remove.do?id="+id
+                // }).then(function (res) {
+                //     if (res.data){
+                //         location.href="orderManage.html";
+                //     }else {
+                //         alert("删除失败!请重试!");
+                //     }
+                // })
+            },
+            // a链接：跳转到修改页面
+            update(id){
+                const th=this;
+
+                /*统一请求网关API*/
+                get("/OrderService/findById.do?id="+id).then(res=>{
+                    if (res != null){
+                        location.href="orderUpdate.html?jsonOrder="+JSON.stringify(res.data)+"&pros="+JSON.stringify(th.providers);
+                    }
+                })
+
+                // axios({
+                //     method:"get",
+                //     url:"http://localhost:8020/findById.do?id="+id
+                // }).then(function (res) {
+                //     if (res != null){
+                //         location.href="orderUpdate.html?jsonOrder="+JSON.stringify(res.data)+"&pros="+JSON.stringify(th.providers);
+                //     }
+                // })
+            },
+            // 查询
+            query(){
+                const th=this;
+                const pars={params: {name:this.name,proId:this.proId,isPay:this.isPay}};
+
+                /*统一请求网关API*/
+                get("/OrderService/getOrders.do",pars).then(res=>{
+                    th.orders=res.data.orders;
+                    th.providers=res.data.providers;
+                })
+
+                // axios.get("http://localhost:8020/getOrders.do",pars).then(function (res) {
+                //     th.orders=res.data.orders;
+                //     th.providers=res.data.providers;
+                // })
+            },
+        }
+    })
+</script>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>超市订单管理系统</title>
+    <link type="text/css" rel="stylesheet" href="../../css/style.css"/>
+    <link type="text/css" rel="stylesheet" href="../../css/public.css"/>
+</head>
+<body>
+<div id="providerMan">
+    <!--头部-->
+    <header class="publicHeader">
+        <h1>超市订单管理系统</h1>
+        <div class="publicHeaderR">
+            <p><span>下午好！</span><span style="color: #fff21b" v-text="un"> 系统管理员</span> , 欢迎你！</p>
+            <a href="../sms-User/login.html">退出</a>
+        </div>
+    </header>
+    <!--时间-->
+    <section class="publicTime">
+        <span id="time">2015年1月1日 11:11  星期一</span>
+        <a href="#">温馨提示：为了能正常浏览，请使用高版本浏览器！（IE10+）</a>
+    </section>
+    <!--主体内容-->
+    <section class="publicMian ">
+        <div class="left">
+            <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+            <nav>
+                <ul class="list">
+                    <li><a href="../sms-Order/orderManage.html">订单管理</a></li>
+                    <li><a href="providerManage.html">供应商管理</a></li>
+                    <li><a href="../sms-User/userList.html">用户管理</a></li>
+                    <li><a href="../sms-User/pwUpdate.html">密码修改</a></li>
+                    <li><a href="../sms-User/login.html">退出系统</a></li>
+                </ul>
+            </nav>
+        </div>
+        <input type="hidden" id="path" name="path" value="/SMBMS"/>
+        <input type="hidden" id="referer" name="referer" value="http://localhost:8080jsp/bill.do?method=query"/>
+
+        <div class="right">
+            <div class="location">
+                <strong>你现在所在的位置是:</strong>
+                <span>供应商管理页面</span>
+            </div>
+            <div class="search">
+                <form method="get" action="provider.do" onsubmit="return false">
+                    <input name="method" value="query" type="hidden">
+                    <span>供应商编码：</span>
+                    <input name="queryProCode" type="text" v-model="proCode">
+
+                    <span>供应商名称：</span>
+                    <input name="queryProName" type="text" v-model="proName">
+
+                    <input value="查 询" type="submit" id="searchbutton" @click="query">
+                    <a href="providerAdd.html">添加供应商</a>
+                </form>
+            </div>
+            <!--供应商操作表格-->
+            <table class="providerTable" cellpadding="0" cellspacing="0">
+                <tr class="firstTr">
+                    <th width="10%">供应商编码</th>
+                    <th width="20%">供应商名称</th>
+                    <th width="10%">联系人</th>
+                    <th width="10%">联系电话</th>
+                    <th width="10%">传真</th>
+                    <th width="20%">创建时间</th>
+                    <th width="30%">操作</th>
+                </tr>
+                <tr v-for="provider in providers">
+                    <td>
+                        <span v-text="provider.proCode">null</span>
+                    </td>
+
+                    <td>
+                        <span v-text="provider.proName">null</span>
+                    </td>
+
+                    <td>
+                        <span v-text="provider.proContact">null</span>
+                    </td>
+
+                    <td>
+                        <span v-text="provider.proPhone">null</span>
+                    </td>
+
+                    <td>
+                        <span v-text="provider.proFax">null</span>
+                    </td>
+
+                    <td>
+                        <span v-text="provider.creationDate">null</span>
+                    </td>
+
+                    <td>
+                        <span><a class="viewProvider" :href="'providerShow.html?id='+provider.proId"><img
+                            src="../../images/read.png" alt="查看" title="查看"/></a></span>
+                        <span><a class="modifyProvider" href="javascript:void(0)" @click="update(provider.proId)"><img
+                                src="../../images/xiugai.png" alt="修改" title="修改"/></a></span>
+                        <span><a class="deleteProvider" href="javascript:void(0)" @click="del(provider.proId)"><img
+                                src="../../images/schu.png" alt="删除" title="删除"/></a></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <!--点击删除按钮后弹出的页面-->
+    <div class="zhezhao"></div>
+    <div class="remove" id="removeProv">
+        <div class="removerChid">
+            <h2>提示</h2>
+            <div class="removeMain">
+                <p>你确定要删除该供应商吗？</p>
+                <a href="#" id="yes">确定</a>
+                <a href="#" id="no">取消</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        版权归XXXX
+    </footer>
+    <script type="text/javascript" src="../../js/time.js"></script>
+    <script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="../../js/common.js"></script>
+    <script type="text/javascript" src="../../calendar/WdatePicker.js"></script>
+</div>
+</body>
+</html>
+<script src="../../vue/vue.js"></script>
+<script src="../../axios/axios.js"></script>
+<script type="module">
+    import {get} from "../../js/reqAPI.js";
+    new Vue({
+        el:"#providerMan",
+        data:{
+            un:JSON.parse(localStorage.getItem("loginUserInfo")).userName,
+            proCode:"",
+            proName:"",
+            providers:{},
+        },
+        mounted(){
+            const th=this;
+
+            /*统一请求网关API*/
+            get("/ProviderService/getProviders.do").then(res=>{
+                if (res != null){
+                    th.providers=res.data
+                }
+            })
+
+            // axios({
+            //     method:"get",
+            //     url:"http://localhost:8010/getProviders.do",
+            // }).then((res)=>{
+            //     if (res != null){
+            //         th.providers=res.data
+            //     }
+            // })
+        },
+        methods:{
+            //  a链接：删除
+            del(id){
+
+                /*统一请求网关API*/
+                get("/ProviderService/remove.do?id="+id).then(res=>{
+                    if (res.data){
+                        location.href="providerManage.html";
+                    }else {
+                        alert("删除失败!请重试!");
+                    }
+                })
+
+                // axios({
+                //     method: "get",
+                //     url: "http://localhost:8010/remove.do?id="+id
+                // }).then(function (res) {
+                //     if (res.data){
+                //         location.href="providerManage.html";
+                //     }else {
+                //         alert("删除失败!请重试!");
+                //     }
+                // })
+            },
+            // a链接：跳转到修改页面
+            update(id){
+
+                /*统一请求网关API*/
+                get("/ProviderService/findById.do?id="+id).then(res=>{
+                    if (res != null){
+                        location.href="providerUpdate.html?jsonPro="+JSON.stringify(res.data);
+                    }
+                })
+
+                // axios({
+                //     method:"get",
+                //     url:"http://localhost:8010/findById.do?id="+id
+                // }).then(function (res) {
+                //     if (res != null){
+                //         location.href="providerUpdate.html?jsonPro="+JSON.stringify(res.data);
+                //     }
+                // })
+            },
+            // 查询
+            query(){
+                const th=this;
+                const pars={params: {code:this.proCode,name:this.proName}}
+
+                /*统一请求网关API*/
+                get("/ProviderService/getProviders.do",pars).then(res=>{
+                    th.providers=res.data;
+                })
+
+                // axios.get("http://localhost:8010/getProviders.do",pars).then(function (res) {
+                //     th.providers=res.data;
+                // })
+            },
+        }
+    })
+</script>

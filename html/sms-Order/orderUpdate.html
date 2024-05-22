@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>超市订单管理系统</title>
+    <link type="text/css" rel="stylesheet" href="../../css/style.css"/>
+    <link type="text/css" rel="stylesheet" href="../../css/public.css"/>
+</head>
+<body>
+<div id="orderUpdate">
+    <!--头部-->
+    <header class="publicHeader">
+        <h1>超市订单管理系统</h1>
+        <div class="publicHeaderR">
+            <p><span>下午好！</span><span style="color: #fff21b" v-text="un"> 系统管理员</span> , 欢迎你！</p>
+            <a href="../sms-User/login.html">退出</a>
+        </div>
+    </header>
+    <!--时间-->
+    <section class="publicTime">
+        <span id="time">2015年1月1日 11:11  星期一</span>
+        <a href="#">温馨提示：为了能正常浏览，请使用高版本浏览器！（IE10+）</a>
+    </section>
+    <!--主体内容-->
+    <section class="publicMian ">
+        <div class="left">
+            <h2 class="leftH2"><span class="span1"></span>功能列表 <span></span></h2>
+            <nav>
+                <ul class="list">
+                    <li><a href="orderManage.html">订单管理</a></li>
+                    <li><a href="../sms-Provider/providerManage.html">供应商管理</a></li>
+                    <li><a href="../sms-User/userList.html">用户管理</a></li>
+                    <li><a href="../sms-User/pwUpdate.html">密码修改</a></li>
+                    <li><a href="../sms-User/login.html">退出系统</a></li>
+                </ul>
+            </nav>
+        </div>
+        <input type="hidden" id="path" name="path" value="/SMBMS"/>
+        <input type="hidden" id="referer" name="referer" value="http://localhost:8080jsp/bill.do?method=query"/>
+
+        <div class="right">
+            <div class="location">
+                <strong>你现在所在的位置是:</strong>
+                <span>订单管理页面 >> 订单添加页面</span>
+            </div>
+            <div class="providerAdd">
+                <form id="billForm" name="billForm" method="post" action="bill.do" onsubmit="return false">
+                    <input type="hidden" name="method" value="modifysave">
+                    <input type="hidden" name="id" v-model="orderView.orderId">
+                    <!--div的class 为error是验证错误，ok是验证成功-->
+                    <div class="">
+                        <label for="billCode">订单编码：</label>
+                        <input type="text" name="billCode" id="billCode" v-model="orderView.orderCode" readonly="readonly">
+                    </div>
+                    <div>
+                        <label for="productName">商品名称：</label>
+                        <input type="text" name="productName" id="productName" v-model="orderView.goodsName">
+                        <font color="red"></font>
+                    </div>
+                    <div>
+                        <label for="productUnit">商品单位：</label>
+                        <input type="text" name="productUnit" id="productUnit" v-model="orderView.goodsUnit">
+                        <font color="red"></font>
+                    </div>
+                    <div>
+                        <label for="productCount">商品数量：</label>
+                        <input type="text" name="productCount" id="productCount" v-model="orderView.goodsCount">
+                        <font color="red"></font>
+                    </div>
+                    <div>
+                        <label for="totalPrice">总金额：</label>
+                        <input type="text" name="totalPrice" id="totalPrice" v-model="orderView.totalPrice">
+                        <font color="red"></font>
+                    </div>
+                    <div>
+                        <label for="providerId">供应商：</label>
+                        <input type="hidden" value="13" id="pid"/>
+                        <select name="providerId" id="providerId" v-model="orderView.providerId">
+                            <option v-for="pro in providers" :value="pro.proId">{{pro.proName}}</option>
+                        </select>
+                        <font color="red"></font>
+                    </div>
+                    <div>
+                        <label>是否付款：</label>
+                        <!--vue在radio中的双向数据绑定-->
+                        <input type="radio" name="isPayment" v-model:checked="orderView.isPayment" value="1">未付款
+                        <input type="radio" name="isPayment" v-model:checked="orderView.isPayment" value="2">已付款
+                    </div>
+                    <div class="providerAddBtn">
+                        <input type="button" name="save" id="save" value="保存" @click="updateSave">
+                        <input type="button" id="back" name="back" value="返回" @click="back">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        版权归XXXX
+    </footer>
+    <script type="text/javascript" src="../../js/time.js"></script>
+    <script type="text/javascript" src="../../js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="../../js/common.js"></script>
+    <script type="text/javascript" src="../../calendar/WdatePicker.js"></script>
+</div>
+</body>
+</html>
+<script src="../../vue/vue.js"></script>
+<script src="../../axios/axios.js"></script>
+<script src="../../js/jquery-params.js"></script>
+<script type="module">
+    import {post} from "../../js/reqAPI.js";
+    let jsonOrder = $.query.get("jsonOrder");
+    let pros = $.query.get("pros");
+    new Vue({
+        el: "#orderUpdate",
+        data: {
+            un: JSON.parse(localStorage.getItem("loginUserInfo")).userName,
+            orderView: JSON.parse(jsonOrder),
+            providers:JSON.parse(pros)
+        },
+        methods: {
+            updateSave() {
+                const th = this;
+
+                /*统一请求网关API*/
+                post("/OrderService/modify.do",th.orderView).then(res=>{
+                    if (res.data) {
+                        location.href = "orderManage.html";
+                    } else {
+                        alert("修改失败!请重试!");
+                    }
+                })
+
+                // axios({
+                //     method: "post",
+                //     url: "http://localhost:8020/modify.do",
+                //     data: th.orderView
+                // }).then(function (res) {
+                //     if (res.data) {
+                //         location.href = "orderManage.html";
+                //     } else {
+                //         alert("修改失败!请重试!");
+                //     }
+                // })
+            },
+            back() {
+                history.back();
+            }
+        }
+    })
+</script>
